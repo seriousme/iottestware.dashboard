@@ -1,0 +1,15 @@
+FROM alpine:latest 
+RUN apk add --update nodejs-current npm tcpdump expect libstdc++ ca-certificates 
+
+#Copy Dynamic libs
+COPY --from=seriousme/iottestware-compact /usr/lib/libedit.* /usr/lib/libsctp.* /usr/lib/libxml2.* /usr/lib/libncursesw.* /usr/lib/liblzma.* /usr/lib/
+COPY --from=seriousme/iottestware-compact /home/titan/titan.core/Install/bin /usr/local/bin
+
+WORKDIR /home/titan/iottestware.webserver
+COPY --from=seriousme/iottestware-compact /home/titan/iottestware.webserver .
+
+# CMD ["/bin/sh"]
+CMD ["/usr/bin/npm", "start"]
+
+EXPOSE 3001
+EXPOSE 8080
