@@ -20,6 +20,8 @@ const bodyParser = require('body-parser')
 const socketIo = require('socket.io')
 const path = require('path')
 const fs = require('fs')
+const dist = path.join(__dirname, '..', 'dist')
+const catchall = (process.env.NODE_ENV === "development")?"index.dev.html":"index.html"
 
 // https settings
 // openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365
@@ -60,15 +62,22 @@ const conformanceRouter = require('./src/routes/conformance')(io)
 const testpurposeRouter = require('./src/routes/testpurposes')
 const testcasesRouter = require('./src/routes/testcases')
 
-// webpack
-const webpack = require('webpack')
-const webpackDevMiddleware = require('webpack-dev-middleware')
-const webpackConfig = require('../frontend/webpack.config')
+
+if (process.env.NODE_ENV === "development") {
+  // webpack development
+  const webpack = require('webpack')
+  const webpackDevMiddleware = require('webpack-dev-middleware')
+  const webpackConfig = require('../frontend/webpack.config')
+  app.use(webpackDevMiddleware(webpack(webpackConfig)))
+} else {
+  // production
+  app.use(express.static(dist))
+}
 
 app.use(fileUpload())
 app.use(morgan('dev'))
 
-app.use(webpackDevMiddleware(webpack(webpackConfig)))
+
 app.use(bodyParser.json()) // support json encoded bodies
 app.use(bodyParser.urlencoded({extended: true})) // support encoded bodies
 
@@ -93,7 +102,7 @@ app.use('/v1/report', reportRouter)
  * serve frontend as default route if no backend endpoint was matching
  */
 app.get('*', function (req, res) {
-  res.sendFile(path.join(__dirname + '/../frontend/public', 'index.html'))
+  res.sendFile(path.join(__dirname + '/../frontend/public', catchall))
 })
 
 /*

@@ -36,8 +36,8 @@ RUN /home/titan/git_log.py -p /home/titan/Titan/IoT-Testware/iottestware.mqtt -n
 
 #NPM INSTALL AND START
 WORKDIR /home/titan/iottestware.webserver
-RUN rm -rf node_modules && npm install
-CMD ["npm", "start", "--prefix", "/home/titan/iottestware.webserver"]
+RUN rm -rf node_modules && npm install && npx webpack
+CMD ["npm", "start"]
 
 EXPOSE 3001
 EXPOSE 8080
